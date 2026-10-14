@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube Caption Copier</title>
+  <link rel="stylesheet" href="../content.css">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <header class="header">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" class="logo-icon">
+          <path d="M19 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm-8 7H9.5v-.5h-2v3h2V13H11v1a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v1zm7 0h-1.5v-.5h-2v3h2V13H18v1a1 1 0 0 1-1 1h-3a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v1z"/>
+        </svg>
+        <h1>Caption Copier</h1>
+      </div>
+    </header>
+
+
+    <div class="caption-button-host" id="captionButtonHost"></div>
+
+
+    <div class="form-group">
+      <label>Enabled Formats</label>
+      <div class="check-list" id="enabledFormats">
+        <label class="check-item"><input type="checkbox" value="text"><span>Clean Text (Readable Paragraphs)</span></label>
+        <label class="check-item"><input type="checkbox" value="timestamps"><span>Timestamped Text ([00:15])</span></label>
+        <label class="check-item"><input type="checkbox" value="srt"><span>SRT Subtitles (.srt)</span></label>
+      </div>
+    </div>
+
+    <div class="toggle-row">
+      <div class="toggle-label">
+        <span>Language picker in dropdown</span>
+        <small>Lists the video's caption languages in the button dropdown</small>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="showLanguagesToggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="toggle-row">
+      <div class="toggle-label">
+        <div class="toggle-title">
+          <span>Clean stutter & duplicate words</span>
+          <button type="button" class="info-btn" aria-label="What does this do?" aria-describedby="cleanTextInfo">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+          </button>
+          <div class="info-tooltip" id="cleanTextInfo" role="tooltip">
+            <code>so today we're going to<br>to talk about TypeScript</code>
+            <p class="info-label">Becomes</p>
+            <code>so today we're going to talk about TypeScript</code>
+          </div>
+        </div>
+        <small>Removes words repeated across caption lines</small>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="cleanTextToggle" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="toggle-row">
+      <div class="toggle-label">
+        <span>Include Title & URL header</span>
+        <small>Prepends video name and link at the top of copied text</small>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="includeHeaderToggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <details class="advanced">
+      <summary>Advanced settings</summary>
+      <div class="advanced-body">
+      <div class="form-group">
+        <label for="buttonTextInput">Button Label on YouTube</label>
+        <input type="text" id="buttonTextInput" placeholder="e.g. Captions, Transcript" value="Captions">
+      </div>
+
+        <div class="shortcut-setting">
+          <div class="toggle-row">
+            <div class="toggle-label">
+              <span>Keyboard shortcut</span>
+              <small>Copy captions on a YouTube video</small>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="shortcutToggle">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="shortcut-recorder" id="shortcutRecorder" hidden>
+            <button type="button" class="shortcut-display" id="shortcutDisplay" title="Click to record a new shortcut"></button>
+            <span class="help-text" id="shortcutHint">Click to record a new shortcut</span>
+          </div>
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
