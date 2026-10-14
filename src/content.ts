@@ -1,4 +1,4 @@
-import { CaptionButton, STRINGS, escapeHtml, hasMenuOptions, type MenuModel } from './caption-button';
+import { CaptionButton, STRINGS, createElement, createIcon, hasMenuOptions, type MenuModel } from './caption-button';
 import {
   MSG,
   getDefaultSettings,
@@ -405,18 +405,12 @@ function showToast(message: string, type: ToastType = null, meta: string | null 
     document.body.appendChild(toast);
   }
 
-  const iconHtml =
-    type === 'warning'
-      ? `<svg class="yt-caption-copier-toast-icon warning" viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>`
-      : `<svg class="yt-caption-copier-toast-icon" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`;
-
-  toast.innerHTML = `
-    ${iconHtml}
-    <div class="yt-caption-copier-toast-message">
-      <div>${escapeHtml(message)}</div>
-      ${meta ? `<div class="yt-caption-copier-toast-meta">${escapeHtml(meta)}</div>` : ''}
-    </div>
-  `;
+  const messageEl = createElement('div', 'yt-caption-copier-toast-message', createElement('div', undefined, message));
+  if (meta) messageEl.append(createElement('div', 'yt-caption-copier-toast-meta', meta));
+  toast.replaceChildren(
+    createIcon(type === 'warning' ? 'warning' : 'check', 24, type === 'warning' ? 'yt-caption-copier-toast-icon warning' : 'yt-caption-copier-toast-icon'),
+    messageEl
+  );
   toast.classList.add('visible');
 
   if (toastTimeout) clearTimeout(toastTimeout);

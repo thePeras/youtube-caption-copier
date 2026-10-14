@@ -7,11 +7,15 @@
     "build": "node build.mjs",
     "watch": "node build.mjs --watch",
     "typecheck": "tsc --noEmit",
-    "package": "npm run typecheck && npm run build && cd dist && zip -r ../youtube-caption-copier.zip ."
+    "package": "npm run typecheck && npm run build && cd dist && zip -r ../youtube-caption-copier.zip .",
+    "build:chrome": "node build.mjs --chrome",
+    "package:chrome": "npm run typecheck && npm run build:chrome && cd dist-chrome && zip -r ../youtube-caption-copier-chrome.zip . -x '.*'"
   },
   "devDependencies": {
     "@types/webextension-polyfill": "^0.12.6",
     "esbuild": "^0.28.2",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "web-ext": "^10.7.0",
+    "webextension-polyfill": "^0.12.0"
   }
 }

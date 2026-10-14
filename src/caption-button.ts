@@ -1,22 +1,40 @@
 import type { CaptionFormat } from './shared';
 
-export const ICONS = {
-  cc: `<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-    <path d="M19 4H5c-1.11 0-2 .9-2 2v12c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H5V6h14v12zM7 15h3c.55 0 1-.45 1-1v-1H9.5v.5h-2v-3h2v.5H11v-1c0-.55-.45-1-1-1H7c-.55 0-1 .45-1 1v4c0 .55.45 1 1 1zm7 0h3c.55 0 1-.45 1-1v-1h-1.5v.5h-2v-3h2v.5H18v-1c0-.55-.45-1-1-1h-3c-.55 0-1 .45-1 1v4c0 .55.45 1 1 1z"/>
-  </svg>`,
-  check: `<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-  </svg>`,
-  chevron: `<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-    <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
-  </svg>`,
-  spinner: `<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-    <path d="M12 4V2A10 10 0 0 0 2 12h2a8 8 0 0 1 8-8z"/>
-  </svg>`,
-  itemCheck: `<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-  </svg>`
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+const ICON_PATHS = {
+  cc: 'M19 4H5c-1.11 0-2 .9-2 2v12c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H5V6h14v12zM7 15h3c.55 0 1-.45 1-1v-1H9.5v.5h-2v-3h2v.5H11v-1c0-.55-.45-1-1-1H7c-.55 0-1 .45-1 1v4c0 .55.45 1 1 1zm7 0h3c.55 0 1-.45 1-1v-1h-1.5v.5h-2v-3h2v.5H18v-1c0-.55-.45-1-1-1h-3c-.55 0-1 .45-1 1v4c0 .55.45 1 1 1z',
+  check: 'M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z',
+  chevron: 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z',
+  spinner: 'M12 4V2A10 10 0 0 0 2 12h2a8 8 0 0 1 8-8z',
+  warning: 'M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z'
 };
+
+export type IconName = keyof typeof ICON_PATHS;
+
+export function createIcon(name: IconName, size = 24, className?: string): SVGSVGElement {
+  const svg = document.createElementNS(SVG_NS, 'svg');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('width', String(size));
+  svg.setAttribute('height', String(size));
+  svg.setAttribute('fill', 'currentColor');
+  if (className) svg.setAttribute('class', className);
+  const path = document.createElementNS(SVG_NS, 'path');
+  path.setAttribute('d', ICON_PATHS[name]);
+  svg.appendChild(path);
+  return svg;
+}
+
+export function createElement<K extends keyof HTMLElementTagNameMap>(
+  tag: K,
+  className?: string,
+  ...children: (Node | string)[]
+): HTMLElementTagNameMap[K] {
+  const el = document.createElement(tag);
+  if (className) el.className = className;
+  el.append(...children);
+  return el;
+}
 
 export const STRINGS = {
   copied: 'Copied!',
@@ -70,15 +88,6 @@ const MENU_GAP = 4;
 const VIEWPORT_MARGIN = 8;
 const LABEL_RESET_MS = 2500;
 
-export function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
 export function hasMenuOptions(model: Pick<MenuModel, 'formats' | 'showLanguages' | 'tracks'>): boolean {
   return model.formats.length > 1 || (model.showLanguages && model.tracks.length > 1);
 }
@@ -96,33 +105,28 @@ export class CaptionButton {
   constructor(private readonly options: CaptionButtonOptions) {
     this.label = options.label;
 
-    const wrapper = document.createElement('div');
-    if (options.id) wrapper.id = options.id;
-    wrapper.className = ['yt-caption-copier-wrapper', options.extraClass].filter(Boolean).join(' ');
-    wrapper.innerHTML = `
-      <div class="yt-caption-copier-pill">
-        <button class="yt-caption-copier-main-btn" title="Copy captions to clipboard" aria-label="Copy captions">
-          <span class="yt-caption-copier-icon">${ICONS.cc}</span>
-          <span class="yt-caption-copier-label">${escapeHtml(this.label)}</span>
-        </button>
-        <div class="yt-caption-copier-divider"></div>
-        <button class="yt-caption-copier-chevron-btn" title="Caption options and formats" aria-label="Caption options">
-          ${ICONS.chevron}
-        </button>
-      </div>
-    `;
+    this.iconEl = createElement('span', 'yt-caption-copier-icon', createIcon('cc'));
+    this.labelEl = createElement('span', 'yt-caption-copier-label', this.label);
 
+    const mainBtn = createElement('button', 'yt-caption-copier-main-btn', this.iconEl, this.labelEl);
+    mainBtn.title = 'Copy captions to clipboard';
+    mainBtn.setAttribute('aria-label', 'Copy captions');
+
+    const chevronBtn = createElement('button', 'yt-caption-copier-chevron-btn', createIcon('chevron', 16));
+    chevronBtn.title = 'Caption options and formats';
+    chevronBtn.setAttribute('aria-label', 'Caption options');
+
+    this.pill = createElement('div', 'yt-caption-copier-pill', mainBtn, createElement('div', 'yt-caption-copier-divider'), chevronBtn);
+
+    const wrapper = createElement('div', ['yt-caption-copier-wrapper', options.extraClass].filter(Boolean).join(' '), this.pill);
+    if (options.id) wrapper.id = options.id;
     this.element = wrapper;
-    this.pill = wrapper.querySelector('.yt-caption-copier-pill')!;
-    this.iconEl = wrapper.querySelector('.yt-caption-copier-icon')!;
-    this.labelEl = wrapper.querySelector('.yt-caption-copier-label')!;
 
     this.menu = document.createElement('div');
     this.menu.className = 'yt-caption-copier-menu';
     this.menu.setAttribute('role', 'menu');
     document.body.appendChild(this.menu);
 
-    const mainBtn = wrapper.querySelector<HTMLButtonElement>('.yt-caption-copier-main-btn')!;
     mainBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       this.closeMenu();
@@ -133,7 +137,7 @@ export class CaptionButton {
       e.preventDefault();
       void this.toggleMenu(e);
     });
-    wrapper.querySelector<HTMLButtonElement>('.yt-caption-copier-chevron-btn')!.addEventListener('click', (e) => {
+    chevronBtn.addEventListener('click', (e) => {
       void this.toggleMenu(e);
     });
 
@@ -170,7 +174,7 @@ export class CaptionButton {
     this.busy = true;
     this.clearLabelTimer();
     this.pill.classList.remove('copied');
-    this.iconEl.innerHTML = ICONS.spinner;
+    this.iconEl.replaceChildren(createIcon('spinner'));
     this.iconEl.classList.add('spinning');
     this.labelEl.textContent = STRINGS.loading;
   }
@@ -179,7 +183,7 @@ export class CaptionButton {
     this.busy = false;
     this.pill.classList.add('copied');
     this.iconEl.classList.remove('spinning');
-    this.iconEl.innerHTML = ICONS.check;
+    this.iconEl.replaceChildren(createIcon('check'));
     this.labelEl.textContent = STRINGS.copied;
     this.scheduleReset();
   }
@@ -188,7 +192,7 @@ export class CaptionButton {
     this.busy = false;
     this.pill.classList.remove('copied');
     this.iconEl.classList.remove('spinning');
-    this.iconEl.innerHTML = ICONS.cc;
+    this.iconEl.replaceChildren(createIcon('cc'));
     this.labelEl.textContent = message;
     this.scheduleReset();
   }
@@ -198,7 +202,7 @@ export class CaptionButton {
     this.clearLabelTimer();
     this.pill.classList.remove('copied');
     this.iconEl.classList.remove('spinning');
-    this.iconEl.innerHTML = ICONS.cc;
+    this.iconEl.replaceChildren(createIcon('cc'));
     this.labelEl.textContent = this.label;
   }
 
@@ -250,59 +254,54 @@ export class CaptionButton {
   }
 
   private renderMenu(model: MenuModel): void {
-    const sections: string[] = [];
-    const item = (attrs: string, active: boolean, content: string) => `
-      <li class="yt-caption-copier-menu-item ${active ? 'active' : ''}" role="menuitem" ${attrs}>
-        ${content}
-        <div class="yt-caption-copier-menu-item-check">${ICONS.itemCheck}</div>
-      </li>`;
+    const sections: HTMLElement[][] = [];
+    const item = (active: boolean, content: Node, onSelect: () => void) => {
+      const li = createElement(
+        'li',
+        ['yt-caption-copier-menu-item', active ? 'active' : ''].filter(Boolean).join(' '),
+        content,
+        createElement('div', 'yt-caption-copier-menu-item-check', createIcon('check', 18))
+      );
+      li.setAttribute('role', 'menuitem');
+      li.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        this.closeMenu();
+        onSelect();
+      });
+      return li;
+    };
+    const section = (title: string, items: HTMLElement[]) => [
+      createElement('div', 'yt-caption-copier-menu-section-title', title),
+      createElement('ul', 'yt-caption-copier-menu-list', ...items)
+    ];
 
     if (model.formats.length > 1) {
-      sections.push(`
-        <div class="yt-caption-copier-menu-section-title">${STRINGS.formatTitle}</div>
-        <ul class="yt-caption-copier-menu-list">
-          ${model.formats
-            .map((fmt) => item(`data-format="${fmt}"`, fmt === model.currentFormat, `<span>${FORMAT_LABELS[fmt]}</span>`))
-            .join('')}
-        </ul>`);
+      sections.push(
+        section(
+          STRINGS.formatTitle,
+          model.formats.map((fmt) =>
+            item(fmt === model.currentFormat, createElement('span', undefined, FORMAT_LABELS[fmt]), () => this.options.onSelectFormat(fmt))
+          )
+        )
+      );
     }
 
     if (model.showLanguages && model.tracks.length > 1) {
-      sections.push(`
-        <div class="yt-caption-copier-menu-section-title">${STRINGS.langTitle}</div>
-        <ul class="yt-caption-copier-menu-list">
-          ${model.tracks
-            .map((track, idx) =>
-              item(
-                `data-track-index="${idx}"`,
-                idx === model.selectedTrackIndex,
-                `<div class="yt-caption-copier-menu-item-label">
-                  <span>${escapeHtml(track.name)}</span>
-                  ${track.kind === 'asr' ? `<span class="yt-caption-copier-menu-badge">${STRINGS.autoBadge}</span>` : ''}
-                </div>`
-              )
-            )
-            .join('')}
-        </ul>`);
+      sections.push(
+        section(
+          STRINGS.langTitle,
+          model.tracks.map((track, idx) => {
+            const label = createElement('div', 'yt-caption-copier-menu-item-label', createElement('span', undefined, track.name));
+            if (track.kind === 'asr') label.append(createElement('span', 'yt-caption-copier-menu-badge', STRINGS.autoBadge));
+            return item(idx === model.selectedTrackIndex, label, () => this.options.onSelectTrack(idx));
+          })
+        )
+      );
     }
 
-    this.menu.innerHTML = sections.join('<div class="yt-caption-copier-menu-divider"></div>');
-
-    this.menu.querySelectorAll<HTMLElement>('[data-format]').forEach((el) => {
-      el.addEventListener('click', (ev) => {
-        ev.stopPropagation();
-        this.closeMenu();
-        this.options.onSelectFormat(el.dataset.format as CaptionFormat);
-      });
-    });
-
-    this.menu.querySelectorAll<HTMLElement>('[data-track-index]').forEach((el) => {
-      el.addEventListener('click', (ev) => {
-        ev.stopPropagation();
-        this.closeMenu();
-        this.options.onSelectTrack(parseInt(el.dataset.trackIndex ?? '0', 10));
-      });
-    });
+    this.menu.replaceChildren(
+      ...sections.flatMap((nodes, i) => (i === 0 ? nodes : [createElement('div', 'yt-caption-copier-menu-divider'), ...nodes]))
+    );
   }
 
   private positionMenu(): void {

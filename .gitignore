@@ -1,2 +1,9 @@
 node_modules/
 dist/
+dist-chrome/
+web-ext-artifacts/
+dist-chrome/
+*.zip
+store/*.zip
+
+.DS_Store

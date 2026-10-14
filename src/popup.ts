@@ -45,6 +45,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   let lastFormat: CaptionFormat = getDefaultSettings().format;
   let shortcut = getDefaultSettings().shortcut;
+  const canUpdateShortcut = typeof browser.commands.update === 'function';
+  const idleHint = canUpdateShortcut ? 'Click to record a new shortcut' : 'Click to change it in the browser shortcut settings';
   let recording = false;
   let activeTabId: number | null = null;
   let menuInfo: CaptionMenuInfo = { tracks: [], selectedTrackIndex: 0 };
@@ -155,6 +157,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       shortcutDisplay.textContent = 'Press keys…';
       return;
     }
+    if (!shortcut) {
+      shortcutDisplay.textContent = 'Not set';
+      return;
+    }
     shortcutDisplay.replaceChildren(
       ...shortcutKeys(shortcut).flatMap((key, i) => {
         const kbd = document.createElement('kbd');
@@ -185,7 +191,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     e.stopPropagation();
     if (e.key === 'Escape') {
       stopRecording();
-      setShortcutHint('Click to record a new shortcut');
+      setShortcutHint(idleHint);
       return;
     }
 
@@ -200,14 +206,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!(await applyShortcut(result.shortcut))) return;
     shortcut = result.shortcut;
     renderShortcut();
-    setShortcutHint('Click to record a new shortcut');
+    setShortcutHint(idleHint);
     void browser.storage.local.set({ shortcut });
   }
 
   shortcutDisplay.addEventListener('click', () => {
+    if (!canUpdateShortcut) {
+      void browser.tabs.create({ url: 'chrome://extensions/shortcuts' });
+      return;
+    }
     if (recording) {
       stopRecording();
-      setShortcutHint('Click to record a new shortcut');
+      setShortcutHint(idleHint);
       return;
     }
     recording = true;
@@ -219,8 +229,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   shortcutDisplay.addEventListener('blur', () => {
     if (!recording) return;
     stopRecording();
-    setShortcutHint('Click to record a new shortcut');
+    setShortcutHint(idleHint);
   });
+
+  if (!canUpdateShortcut) {
+    try {
+      const commands = await browser.commands.getAll();
+      shortcut = commands.find((c) => c.name === COPY_COMMAND)?.shortcut ?? '';
+    } catch (err) {
+      console.warn('Error reading shortcut:', err);
+    }
+    shortcutDisplay.title = 'Change shortcut';
+    setShortcutHint(idleHint);
+  }
 
   syncFormatControls();
   refreshButton();
@@ -267,7 +288,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   showLanguagesToggle.addEventListener('change', saveSettings);
   shortcutToggle.addEventListener('change', () => {
     if (recording) stopRecording();
-    setShortcutHint('Click to record a new shortcut');
+    setShortcutHint(idleHint);
     renderShortcut();
     saveSettings();
   });

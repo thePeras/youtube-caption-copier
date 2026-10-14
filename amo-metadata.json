@@ -1,0 +1,13 @@
+{
+  "categories": ["photos-music-videos"],
+  "summary": {
+    "en-US": "Adds a native-looking Captions button next to Share and Save on YouTube that copies the video's captions to your clipboard in one click."
+  },
+  "description": {
+    "en-US": "YouTube Caption Copier adds a Captions button to YouTube's action bar, styled like the built-in Share and Save buttons, in light and dark mode.\n\nClick it and the video's captions are copied to your clipboard. It uses the same caption language YouTube picks for you.\n\nThe extension only runs on youtube.com and does not collect or send any data."
+  },
+  "version": {
+    "license": "MIT",
+    "approval_notes": "The extension is written in TypeScript and bundled with esbuild (not minified). The attached source archive contains everything needed to rebuild it.\n\nBuild steps (Node.js 20+, npm 10+):\n1. npm ci\n2. npm run build\n\nThe output in dist/ is the submitted extension.\n\nNote for testing: YouTube now requires a proof-of-origin token on caption requests. page-script.js reads that token from the YouTube player's own caption requests (and briefly toggles the player's CC button if none exists yet) so the captions can be fetched from the page. No data leaves youtube.com."
+  }
+}
